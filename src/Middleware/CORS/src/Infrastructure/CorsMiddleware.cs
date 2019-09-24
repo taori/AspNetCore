@@ -116,14 +116,6 @@ namespace Microsoft.AspNetCore.Cors.Infrastructure
         /// <inheritdoc />
         public Task Invoke(HttpContext context, ICorsPolicyProvider corsPolicyProvider)
         {
-            // Flag to indicate to other systems, that CORS middleware was run for this request
-            context.Items[CorsMiddlewareInvokedKey] = CorsMiddlewareInvokedValue;
-
-            if (!context.Request.Headers.ContainsKey(CorsConstants.Origin))
-            {
-                return _next(context);
-            }
-
             // CORS policy resolution rules:
             //
             // 1. If there is an endpoint with IDisableCorsAttribute then CORS is not run
@@ -131,8 +123,20 @@ namespace Microsoft.AspNetCore.Cors.Infrastructure
             //    there is an endpoint with IEnableCorsAttribute that has a policy name then
             //    fetch policy by name, prioritizing it above policy on middleware
             // 3. If there is no policy on middleware then use name on middleware
-
             var endpoint = context.GetEndpoint();
+
+            if (endpoint != null)
+            {
+                // Flag to indicate to the system that the middleware was run in the context of endpoint routing.
+                // Setting this flag allows a check in EndpointRoutingMiddleware that verifies if the middleware
+                // pipeline is wired correctly to succeed.
+                context.Items[CorsMiddlewareInvokedKey] = CorsMiddlewareInvokedValue;
+            }
+
+            if (!context.Request.Headers.ContainsKey(CorsConstants.Origin))
+            {
+                return _next(context);
+            }
 
             // Get the most significant CORS metadata for the endpoint
             // For backwards compatibility reasons this is then downcast to Enable/Disable metadata

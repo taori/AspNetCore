@@ -35,8 +35,13 @@ namespace Microsoft.AspNetCore.Authorization
 
             var endpoint = context.GetEndpoint();
 
-            // Flag to indicate to other systems, e.g. MVC, that authorization middleware was run for this request
-            context.Items[AuthorizationMiddlewareInvokedKey] = AuthorizationMiddlewareInvokedValue;
+            if (endpoint != null)
+            {
+                // Flag to indicate to the system that the middleware was run in the context of endpoint routing.
+                // Setting this flag allows a check in EndpointRoutingMiddleware that verifies if the middleware
+                // pipeline is wired correctly to succeed.
+                context.Items[AuthorizationMiddlewareInvokedKey] = AuthorizationMiddlewareInvokedValue;
+            }
 
             // IMPORTANT: Changes to authorization logic should be mirrored in MVC's AuthorizeFilter
             var authorizeData = endpoint?.Metadata.GetOrderedMetadata<IAuthorizeData>() ?? Array.Empty<IAuthorizeData>();

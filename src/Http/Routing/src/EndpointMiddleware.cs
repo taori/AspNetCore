@@ -91,7 +91,7 @@ namespace Microsoft.AspNetCore.Routing
             throw new InvalidOperationException($"Endpoint {endpoint.DisplayName} contains authorization metadata, " +
                 "but a middleware was not found that supports authorization." +
                 Environment.NewLine +
-                "Configure your application startup by adding app.UseAuthorization() inside the call to Configure(..) in the application startup code.");
+                "Configure your application startup by adding app.UseAuthorization() inside the call to Configure(..) in the application startup code. The call to app.UseAuthorization() must appear between app.UseRouting() and app.UseEndpoints(...).");
         }
 
         private static void ThrowMissingCorsMiddlewareException(Endpoint endpoint)
@@ -99,7 +99,7 @@ namespace Microsoft.AspNetCore.Routing
             throw new InvalidOperationException($"Endpoint {endpoint.DisplayName} contains CORS metadata, " +
                 "but a middleware was not found that supports CORS." +
                 Environment.NewLine +
-                "Configure your application startup by adding app.UseCors() inside the call to Configure(..) in the application startup code.");
+                "Configure your application startup by adding app.UseCors() inside the call to Configure(..) in the application startup code. The call to app.UseAuthorization() must appear between app.UseRouting() and app.UseEndpoints(...).");
         }
 
         private static class Log
