@@ -937,7 +937,25 @@ namespace Microsoft.AspNetCore.Components
                 return false;
             }
 
-            if (format != null && DateTime.TryParseExact(text, format, culture ?? CultureInfo.CurrentCulture, DateTimeStyles.None, out var converted))
+            // We need to special case the format used by input type=time as the value from the input element takes different values
+            // based on attributes in the input element.
+            // For example,
+            // <input type="time" /> values will always have the format 'HH:mm'.
+            // <input type="time" step="1" /> will have the format 'HH:mm:ss' except for when 'ss' == '00' which will be 'HH:mm'.
+            if (format == "HH:mm:ss")
+            {
+                if (DateTime.TryParseExact(text, format, culture ?? CultureInfo.CurrentCulture, DateTimeStyles.None, out var timeWithSeconds))
+                {
+                    value = timeWithSeconds;
+                    return true;
+                }
+                else if (DateTime.TryParseExact(text, "HH:mm", culture ?? CultureInfo.CurrentCulture, DateTimeStyles.None, out var timeWithoutSeconds))
+                {
+                    value = timeWithoutSeconds;
+                    return true;
+                }
+            }
+            else if (format != null && DateTime.TryParseExact(text, format, culture ?? CultureInfo.CurrentCulture, DateTimeStyles.None, out var converted))
             {
                 value = converted;
                 return true;
